@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title></title>
+        <link type="text/css" rel="stylesheet" href="/lib/jquery.dropdown.css" />
+        <style type="text/css">
+            body{
+                font-family: arial;
+                padding-left:20px;
+            }
+
+            label{
+                display: inline-block;
+                width: 180px;
+                text-align: right;
+                margin-right: 20px;
+            }
+
+            input{
+                width: 200px;
+            }
+
+            .row{
+                margin-bottom: 10px;
+            }
+
+            #postcode{
+                width: 100px;
+            }
+        </style>
+    </head>
+    <body>
+        <h1>Postcode Lookup Example</h1>
+
+        <form action="">
+            <div class="row">
+                <label for="country">Country</label>
+                <select name="country" id="country" class="pl-country-code">
+                    <option value=""></option>
+                    <option value="DE">Germany</option>
+                    <option value="GB">United Kingdom</option>
+                    <option value="US">United States</option>
+                </select>
+            </div>
+
+            <div class="row">
+                <label for="postcode">Postcode</label>
+                <input type="text" id="postcode" data-dropdown="#dropdown-1" class="pl-postcode"/>
+            </div>
+
+            <div class="row">
+                <label for="street1">Address line 1</label>
+                <input type="text" id="street1" class="pl-street1"/>
+            </div>
+
+
+            <div class="row">
+                <label for="street2">Address line 2</label>
+                <input type="text" id="street2" class="pl-street2"/>
+            </div>
+
+            <div class="row">
+                <label for="street3">Address line 3</label>
+                <input type="text" id="street3" class="pl-street3"/>
+            </div>
+
+            <div class="row">
+                <label for="city">Town/City</label>
+                <input type="text" id="city" class="pl-city"/>
+            </div>
+
+            <div class="row">
+                <label for="county">County/State/Province</label>
+                <input type="text" id="county" class="pl-county"/>
+            </div>
+        </form>
+
+        <div id="dropdown-1" class="dropdown dropdown-tip">
+            <ul class="dropdown-menu">
+                <li><a href="#1">Item 1</a></li>
+                <li><a href="#2">Item 2</a></li>
+                <li><a href="#3">Item 3</a></li>
+            </ul>
+        </div>
+
+        <script src="//ajax.googleapis.com/ajax/libs/jquery/2.0.2/jquery.min.js"></script>
+        <script src="/lib/jquery.dropdown.js"></script>
+        <script src="/lib/jquery.postcode-lookup.js"></script>
+    </body>
+</html>
