@@ -2,7 +2,6 @@
 <html>
     <head>
         <title></title>
-        <link type="text/css" rel="stylesheet" href="/lib/jquery.dropdown.css" />
         <style type="text/css">
             body{
                 font-family: arial;
@@ -27,6 +26,32 @@
             #postcode{
                 width: 100px;
             }
+
+            .addresses{
+                width: 204px;
+                height:100px;
+                margin-left: 204px;;
+                border: 1px solid gray;
+                overflow: auto;
+            }
+
+            .address-items {
+                list-style: none;
+                margin: 0;
+                padding: 0;
+            }
+
+            .address-items li a{
+                display: block;
+                padding:3px 3px 3px 5px;
+                font-size: 11px;
+                text-decoration: none;
+                /*border-bottom: 1px solid lightgray;*/
+            }
+
+            .address-items li a:hover{
+                background-color: lightgray;
+            }
         </style>
     </head>
     <body>
@@ -38,14 +63,23 @@
                 <select name="country" id="country" class="pl-country-code">
                     <option value=""></option>
                     <option value="DE">Germany</option>
-                    <option value="GB">United Kingdom</option>
+                    <option value="GB" selected>United Kingdom</option>
                     <option value="US">United States</option>
                 </select>
             </div>
 
             <div class="row">
                 <label for="postcode">Postcode</label>
-                <input type="text" id="postcode" data-dropdown="#dropdown-1" class="pl-postcode"/>
+                <input type="text" id="postcode" class="pl-postcode" value="WR2 6NJ"/>
+                <button class="pl-find-postcode-button">Find Postcode</button>
+            </div>
+
+            <div class="row pl-address-container">
+                <div class="addresses">
+                    <ul class="address-items">
+                        <!--<li><a>Item 1</a></li>-->
+                    </ul>
+                </div>
             </div>
 
             <div class="row">
@@ -75,16 +109,8 @@
             </div>
         </form>
 
-        <div id="dropdown-1" class="dropdown dropdown-tip">
-            <ul class="dropdown-menu">
-                <li><a href="#1">Item 1</a></li>
-                <li><a href="#2">Item 2</a></li>
-                <li><a href="#3">Item 3</a></li>
-            </ul>
-        </div>
-
         <script src="//ajax.googleapis.com/ajax/libs/jquery/2.0.2/jquery.min.js"></script>
-        <script src="/lib/jquery.dropdown.js"></script>
+        <!--<script src="/lib/jquery.dropdown.js"></script>-->
         <script src="/lib/jquery.postcode-lookup.js"></script>
     </body>
 </html>
