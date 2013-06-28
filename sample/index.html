@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
     <head>
-        <title></title>
+        <title>Postcode Lookup Example</title>
         <style type="text/css">
             body{
                 font-family: arial;
@@ -27,40 +27,27 @@
                 width: 100px;
             }
 
-            .addresses{
-                width: 204px;
-                height:100px;
-                margin-left: 204px;;
-                border: 1px solid gray;
-                overflow: auto;
-            }
-
-            .address-items {
-                list-style: none;
-                margin: 0;
-                padding: 0;
-            }
-
-            .address-items li a{
-                display: block;
-                padding:3px 3px 3px 5px;
-                font-size: 11px;
-                text-decoration: none;
-                /*border-bottom: 1px solid lightgray;*/
-            }
-
             .pl-address-chooser{
                 display:block;
                 margin:0px;
                 margin-left:204px;
                 width:206px;
             }
+
+            .pl-address-chooser.second{
+                margin-top:10px;
+            }
         </style>
     </head>
     <body>
         <h1>Postcode Lookup Example</h1>
 
-        <form action="">
+        <form action=""
+              class="pl-init"
+              data-pl-username=''
+              data-pl-int-api-key=""
+              data-pl-uk-api-key="">
+
             <div class="row">
                 <label for="country">Country</label>
                 <select name="country" id="country" class="pl-country-code">
@@ -77,19 +64,7 @@
                 <button class="pl-find-postcode-button">Find Postcode</button>
             </div>
 
-            <div class="row pl-address-container">
-                <!--
-                <select name="address-chooser" class="pl-address-chooser">
-                    <option value="">Choose your street</option>
-                    <option value="">Option 1</option>
-                    <option value="">Option 1</option>
-                    <option value="">Option 1</option>
-                    <option value="">Option 1</option>
-                    <option value="">Option 1</option>
-                    <option value="">Option 1</option>
-                </select>
-                -->
-            </div>
+            <div class="row pl-address-container"></div>
 
             <div class="row">
                 <label for="street1">Address line 1</label>
@@ -119,7 +94,6 @@
         </form>
 
         <script src="//ajax.googleapis.com/ajax/libs/jquery/2.0.2/jquery.min.js"></script>
-        <!--<script src="/lib/jquery.dropdown.js"></script>-->
         <script src="/lib/jquery.postcode-lookup.js"></script>
     </body>
 </html>
