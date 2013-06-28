@@ -49,8 +49,11 @@
                 /*border-bottom: 1px solid lightgray;*/
             }
 
-            .address-items li a:hover{
-                background-color: lightgray;
+            .pl-address-chooser{
+                display:block;
+                margin:0px;
+                margin-left:204px;
+                width:206px;
             }
         </style>
     </head>
@@ -63,23 +66,29 @@
                 <select name="country" id="country" class="pl-country-code">
                     <option value=""></option>
                     <option value="DE">Germany</option>
-                    <option value="GB" selected>United Kingdom</option>
-                    <option value="US">United States</option>
+                    <option value="GB">United Kingdom</option>
+                    <option value="US" selected>United States</option>
                 </select>
             </div>
 
             <div class="row">
                 <label for="postcode">Postcode</label>
-                <input type="text" id="postcode" class="pl-postcode" value="WR2 6NJ"/>
+                <input type="text" id="postcode" class="pl-postcode" value="CA 94043" placeholder="WR2 6NJ"/>
                 <button class="pl-find-postcode-button">Find Postcode</button>
             </div>
 
             <div class="row pl-address-container">
-                <div class="addresses">
-                    <ul class="address-items">
-                        <!--<li><a>Item 1</a></li>-->
-                    </ul>
-                </div>
+                <!--
+                <select name="address-chooser" class="pl-address-chooser">
+                    <option value="">Choose your street</option>
+                    <option value="">Option 1</option>
+                    <option value="">Option 1</option>
+                    <option value="">Option 1</option>
+                    <option value="">Option 1</option>
+                    <option value="">Option 1</option>
+                    <option value="">Option 1</option>
+                </select>
+                -->
             </div>
 
             <div class="row">
