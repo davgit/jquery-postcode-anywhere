@@ -509,8 +509,6 @@
                 apiResult.status.type = 'error';
                 apiResult.status.message = data.Items[0].Description;
                 apiResult.status.description = data.Items[0].Cause;
-
-                console.log(data.Items[0])
             }
             else
             {
@@ -606,17 +604,3 @@
 
 
 })(jQuery);
-
-
-
-
-
-
-
-
-
-
-
-
-
-
