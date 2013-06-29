@@ -53,21 +53,22 @@
               data-pl-int-api-key=""
               data-pl-uk-api-key=""
               data-pl-error-invalid-country="Please select a valid country"
-              data-pl-error-no-addresses-found="No addresses were found for this postcode">
+              data-pl-error-no-addresses-found="No addresses were found for this postcode"
+              data-pl-address-box-size="5">
 
             <div class="row">
                 <label for="country">Country</label>
                 <select name="country" id="country" class="pl-country-code">
                     <option value=""></option>
                     <option value="DE">Germany</option>
-                    <option value="GB">United Kingdom</option>
-                    <option value="US" selected>United States</option>
+                    <option value="GB" selected>United Kingdom</option>
+                    <option value="US">United States</option>
                 </select>
             </div>
 
             <div class="row">
                 <label for="postcode">Postcode</label>
-                <input type="text" id="postcode" class="pl-postcode" value="CA 94043" placeholder="WR2 6NJ"/>
+                <input type="text" id="postcode" class="pl-postcode" placeholder="CA 94043" value="WR2 6NJ"/>
                 <button class="pl-find-postcode-button">Find Postcode</button>
                 <span class="pl-error-message"></span>
             </div>
@@ -102,6 +103,6 @@
         </form>
 
         <script src="//ajax.googleapis.com/ajax/libs/jquery/2.0.2/jquery.min.js"></script>
-        <script src="/lib/jquery.postcode-lookup.js"></script>
+        <script src="/jquery.postcode.anywhere.js"></script>
     </body>
 </html>

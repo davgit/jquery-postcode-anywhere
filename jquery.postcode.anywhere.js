@@ -9,6 +9,7 @@
     var $postcodeButton = $('.pl-find-postcode-button');
     var $addressContainer = $('.pl-address-container');
     var $init = $('.pl-init');
+    var addressBoxSize = $init.data('plAddressBoxSize');
     var selectedAddressAtLevel = {};
 
     var api =
@@ -87,14 +88,15 @@
 
         var $selector = $(this);
         var addressId = $selector.val();
-        var countryCode = $selector.data('country-code');
-        var level = $selector.data('next-level');
-        var $option = getSelectedOptionByValueFromSelector($selector, addressId);
 
-        selectedAddressAtLevel[level] = JSON.parse($option.data('stringified'));
-
-        if(addressId.length)
+        if((addressId !== undefined && addressId !== null) && addressId.length)
         {
+            var countryCode = $selector.data('country-code');
+            var level = $selector.data('next-level');
+            var $option = getSelectedOptionByValueFromSelector($selector, addressId);
+
+            selectedAddressAtLevel[level] = JSON.parse($option.data('stringified'));
+
             populateViewWithAddressIn(countryCode, addressId, level);
         }
     });
@@ -421,7 +423,9 @@
             {
                 this.handle = function(adaptedAddressCollection)
                 {
-                    handleFirstLevelAddress(adaptedAddressCollection);
+                    handleFirstLevelAddress(adaptedAddressCollection, addressBoxSize);
+
+                    $addressContainer.find('select.first').attr('size', 1);
                 }
 
                 return this;
@@ -540,15 +544,20 @@
         {
             $addressContainer.empty();
 
-            handleFirstLevelAddress(adaptedAddressCollection);
+            handleFirstLevelAddress(adaptedAddressCollection, addressBoxSize);
         }
 
         return this;
     }
 
-    function handleFirstLevelAddress(adaptedAddressCollection)
+    function handleFirstLevelAddress(adaptedAddressCollection, size)
     {
         var $select = $('<select></select>');
+
+        if(size !== undefined)
+        {
+            $select.attr('size', size);
+        }
 
         $select
             .addClass('pl-address-chooser')
