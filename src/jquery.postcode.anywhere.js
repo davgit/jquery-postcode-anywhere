@@ -1,8 +1,3 @@
-/**
- * User: Ifeanyi Isitor (ifeanyiisitor@gmail.com)
- * Date: 25/06/2013
- */
-
 (function($){
 
     var $errorMessage = $('.pl-error-message');

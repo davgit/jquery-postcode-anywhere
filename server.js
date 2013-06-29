@@ -7,7 +7,7 @@ app.use(express.static(__dirname));
 
 app.get('/*', function(req,res)
 {
-    res.sendfile(path.resolve(__dirname, 'sample/index.html'));
+    res.sendfile(path.resolve(__dirname, 'index.html'));
 });
 
 app.listen(3000);
