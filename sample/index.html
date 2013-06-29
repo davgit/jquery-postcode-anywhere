@@ -37,6 +37,11 @@
             .pl-address-chooser.second{
                 margin-top:10px;
             }
+
+            .pl-error-message{
+                color:red;
+                font-size: 12px;
+            }
         </style>
     </head>
     <body>
@@ -46,7 +51,9 @@
               class="pl-init"
               data-pl-username=""
               data-pl-int-api-key=""
-              data-pl-uk-api-key="">
+              data-pl-uk-api-key=""
+              data-pl-error-invalid-country="Please select a valid country"
+              data-pl-error-no-addresses-found="No addresses were found for this postcode">
 
             <div class="row">
                 <label for="country">Country</label>
@@ -62,6 +69,7 @@
                 <label for="postcode">Postcode</label>
                 <input type="text" id="postcode" class="pl-postcode" value="CA 94043" placeholder="WR2 6NJ"/>
                 <button class="pl-find-postcode-button">Find Postcode</button>
+                <span class="pl-error-message"></span>
             </div>
 
             <div class="row pl-address-container"></div>
