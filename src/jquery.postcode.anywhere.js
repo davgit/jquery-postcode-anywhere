@@ -12,6 +12,7 @@
     var $init = $('.pl-init');
     var addressBoxSize = $init.data('plAddressBoxSize');
     var selectedAddressAtLevel = {};
+    var supportedCountries;
 
     var api =
     {
@@ -26,8 +27,9 @@
         int:{
             key: $init.data('plIntApiKey'),
             url:{
-                byPostcode : '//services.postcodeanywhere.co.uk/PostcodeAnywhereInternational/Interactive/RetrieveByPostalCode/v2.20/json3.ws?callback=?',
-                byStreet   : '//services.postcodeanywhere.co.uk/PostcodeAnywhereInternational/Interactive/ListBuildings/v1.20/json3.ws?callback=?'
+                byPostcode    : '//services.postcodeanywhere.co.uk/PostcodeAnywhereInternational/Interactive/RetrieveByPostalCode/v2.20/json3.ws?callback=?',
+                byStreet      : '//services.postcodeanywhere.co.uk/PostcodeAnywhereInternational/Interactive/ListBuildings/v1.20/json3.ws?callback=?',
+                listCountries : '//services.postcodeanywhere.co.uk/PostcodeAnywhereInternational/Interactive/ListCountries/v2.00/json3.ws?callback=?'
             }
         }
     }
@@ -53,15 +55,35 @@
 
     setDefaultState();
 
-    field.$postCode.on('keyup', function()
+    getSupportedCountries().then(function(result)
     {
-        if(field.$postCode.val())
+        if(result.status !== 'error')
         {
-            enable($postcodeButton);
+            supportedCountries = adaptCountries(result.addressCollection.Items);
         }
-        else
+
+        setInterval(enableLookupButtonDependingOnPostcode, 100);
+    });
+
+    field.$countryCode.on('change', function()
+    {
+        var countryCode = field.$countryCode.val();
+
+        if(countryCode.length)
         {
-            disable($postcodeButton);
+            if(supportedCountries[countryCode] === undefined)
+            {
+                hide($postcodeButton)
+            }
+            else
+            {
+                show($postcodeButton)
+
+                if(currentErrorMessageIs(error.countryRequired))
+                {
+                    hideErrorMessage();
+                }
+            }
         }
     });
 
@@ -101,6 +123,58 @@
             populateViewWithAddressIn(countryCode, addressId, level);
         }
     });
+
+    function populateViewWithAddressIn(countryCode, postcode, level)
+    {
+        hideErrorMessage()
+
+        addressFinderFor(countryCode, level).findBy(postcode).then(function(result)
+        {
+            if(result.status.type == 'error')
+            {
+                showErrorMessageOf(result.status.description);
+            }
+            else
+            {
+                var addressCollectionViewAdapter = addressCollectionViewAdapterFor(countryCode, result.addressCollection.currentLevel);
+                var adaptedAddressCollection     = addressCollectionViewAdapter.adapt(result.addressCollection);
+                var addressCollectionViewHandler = addressCollectionViewHandlerFor(countryCode, result.addressCollection.currentLevel);
+
+                addressCollectionViewHandler.handle(adaptedAddressCollection);
+            }
+        });
+    }
+
+    function enableLookupButtonDependingOnPostcode()
+    {
+        if(field.$postCode.val())
+        {
+            enable($postcodeButton);
+        }
+        else
+        {
+            disable($postcodeButton);
+        }
+    }
+
+    function currentErrorMessageIs(message)
+    {
+        return $errorMessage.html() === message || $errorMessageText.html() === message;
+    }
+
+    function hideErrorMessage()
+    {
+        if($errorMessageText.length)
+        {
+            $errorMessageText.html('');
+        }
+        else
+        {
+            $errorMessage.html('');
+        }
+
+        hide($errorMessage);
+    }
     
     function setDefaultState()
     {
@@ -147,27 +221,6 @@
         return $selectedOption;
     }
 
-    function populateViewWithAddressIn(countryCode, postcode, level)
-    {
-        hide($errorMessage);
-
-        addressFinderFor(countryCode, level).findBy(postcode).then(function(result)
-        {
-            if(result.status.type == 'error')
-            {
-                showErrorMessageOf(result.status.description);
-            }
-            else
-            {
-                var addressCollectionViewAdapter = addressCollectionViewAdapterFor(countryCode, result.addressCollection.currentLevel);
-                var adaptedAddressCollection     = addressCollectionViewAdapter.adapt(result.addressCollection);
-                var addressCollectionViewHandler = addressCollectionViewHandlerFor(countryCode, result.addressCollection.currentLevel);
-
-                addressCollectionViewHandler.handle(adaptedAddressCollection);
-            }
-        });
-    }
-
     function show($element)
     {
         $element.show();
@@ -206,6 +259,151 @@
     function strategyFor(countryCode)
     {
         return countryCode === 'GB' ? ukStrategy : intStrategy;
+    }
+
+    function getSupportedCountries(filter)
+    {
+        var result = new $.Deferred();
+
+        callApiWith(api.int.url.listCountries, {Key:api.uk.key, Filter:filter}).then(function(apiResult)
+        {
+            result.resolve(apiResult);
+        });
+
+        return result.promise();
+    }
+
+    function adaptCountries(countries)
+    {
+        var result = {};
+
+        $.each(countries, function()
+        {
+            var country = this;
+
+            result[country.Iso2] =
+            {
+                iso3: country.Iso3,
+                name: country.Name
+            }
+        });
+
+        return result;
+    }
+
+    function callApiWith(apiUrl, apiCredentials)
+    {
+        var result = new $.Deferred();
+
+        $.getJSON(apiUrl, apiCredentials, function (data)
+        {
+            var apiResult = {
+                status: {
+                    type: '',
+                    message: ''
+                },
+                addressCollection: {}
+            };
+            // Test for an error
+            if (data.Items.length == 1 && typeof(data.Items[0].Error) != "undefined")
+            {
+                apiResult.status.type = 'error';
+                apiResult.status.message = data.Items[0].Description;
+                apiResult.status.description = data.Items[0].Cause;
+            }
+            else
+            {
+                // Check if there were any items found
+                if (data.Items.length == 0)
+                {
+                    apiResult.status.type = 'error';
+                    apiResult.status.message = 'No addresses found';
+                    apiResult.status.description = error.noAddressesFound;
+                }
+                else {
+                    apiResult.status.type = 'success';
+                    apiResult.addressCollection = data;
+                }
+            }
+
+            result.resolve(apiResult);
+        });
+
+        return result.promise();
+    }
+
+    function getFirstLevelAddressViewHandler()
+    {
+        this.handle = function(adaptedAddressCollection)
+        {
+            $addressContainer.empty();
+
+            handleFirstLevelAddress(adaptedAddressCollection, addressBoxSize);
+        }
+
+        return this;
+    }
+
+    function handleFirstLevelAddress(adaptedAddressCollection, size)
+    {
+        var $select = $('<select></select>');
+
+        if(size !== undefined)
+        {
+            $select.attr('size', size);
+        }
+
+        $select
+            .addClass('pl-address-chooser')
+            .addClass(adaptedAddressCollection.currentLevel)
+            .attr('name', 'address-chooser')
+            .data('country-code', adaptedAddressCollection.countryCode)
+            .data('current-level', adaptedAddressCollection.currentLevel)
+            .data('next-level', adaptedAddressCollection.nextLevel)
+            .append(
+                $('<option></option>')
+                    .val('')
+                    .html(adaptedAddressCollection.firstOptionLabel)
+            );
+
+        $.each(adaptedAddressCollection.Items, function(index, item)
+        {
+            var $option = $('<option></option>');
+
+            $option.val(item.id);
+            $option.html(item.label);
+            $option.data('stringified', item.stringified);
+            $option.data('test', 'yes');
+
+            $select.append($option);
+        });
+
+        $addressContainer.append($select);
+
+        show($addressContainer);
+    }
+
+    function getFinalLevelAddressViewHandler()
+    {
+        this.handle = function(adaptedAddress)
+        {
+            hide($addressContainer);
+
+            field.$street1.val(adaptedAddress.street1);
+            field.$street2.val(adaptedAddress.street2);
+            field.$street3.val(adaptedAddress.street3);
+            field.$city.val(adaptedAddress.city);
+            field.$countryCode.val(adaptedAddress.countryCode);
+            field.$postCode.val(adaptedAddress.postcode);
+
+            // Don't use a cached version of the county field, should in case it has
+            // ben converted to select dropdown for example, for US states
+            $('.pl-county').val(adaptedAddress.county);
+
+            $addressContainer.empty();
+        };
+
+        return this;
     }
 
     /////////////////////////////////////////////////////////////////////////////////////////
@@ -499,124 +697,5 @@
             addressViewHandler: getFinalLevelAddressViewHandler
         }
     }
-
-    //////////////////////////////////////////////////////////////////
-
-
-    function callApiWith(apiUrl, apiCredentials)
-    {
-        var result = new $.Deferred();
-
-        $.getJSON(apiUrl, apiCredentials, function (data)
-        {
-            var apiResult = {
-                status: {
-                    type: '',
-                    message: ''
-                },
-                addressCollection: {}
-            };
-            // Test for an error
-            if (data.Items.length == 1 && typeof(data.Items[0].Error) != "undefined")
-            {
-                apiResult.status.type = 'error';
-                apiResult.status.message = data.Items[0].Description;
-                apiResult.status.description = data.Items[0].Cause;
-            }
-            else
-            {
-                // Check if there were any items found
-                if (data.Items.length == 0)
-                {
-                    apiResult.status.type = 'error';
-                    apiResult.status.message = 'No addresses found';
-                    apiResult.status.description = error.noAddressesFound;
-                }
-                else {
-                    apiResult.status.type = 'success';
-                    apiResult.addressCollection = data;
-                }
-            }
-
-            result.resolve(apiResult);
-        });
-
-        return result.promise();
-    }
-
-    function getFirstLevelAddressViewHandler()
-    {
-        this.handle = function(adaptedAddressCollection)
-        {
-            $addressContainer.empty();
-
-            handleFirstLevelAddress(adaptedAddressCollection, addressBoxSize);
-        }
-
-        return this;
-    }
-
-    function handleFirstLevelAddress(adaptedAddressCollection, size)
-    {
-        var $select = $('<select></select>');
-
-        if(size !== undefined)
-        {
-            $select.attr('size', size);
-        }
-
-        $select
-            .addClass('pl-address-chooser')
-            .addClass(adaptedAddressCollection.currentLevel)
-            .attr('name', 'address-chooser')
-            .data('country-code', adaptedAddressCollection.countryCode)
-            .data('current-level', adaptedAddressCollection.currentLevel)
-            .data('next-level', adaptedAddressCollection.nextLevel)
-            .append(
-                $('<option></option>')
-                    .val('')
-                    .html(adaptedAddressCollection.firstOptionLabel)
-            );
-
-        $.each(adaptedAddressCollection.Items, function(index, item)
-        {
-            var $option = $('<option></option>');
-
-            $option.val(item.id);
-            $option.html(item.label);
-            $option.data('stringified', item.stringified);
-            $option.data('test', 'yes');
-
-            $select.append($option);
-        });
-
-        $addressContainer.append($select);
-
-        show($addressContainer);
-    }
-
-    function getFinalLevelAddressViewHandler()
-    {
-        this.handle = function(adaptedAddress)
-        {
-            hide($addressContainer);
-
-            field.$street1.val(adaptedAddress.street1);
-            field.$street2.val(adaptedAddress.street2);
-            field.$street3.val(adaptedAddress.street3);
-            field.$city.val(adaptedAddress.city);
-            field.$countryCode.val(adaptedAddress.countryCode);
-            field.$postCode.val(adaptedAddress.postcode);
-
-            // Don't use a cached version of the county field, should in case it has
-            // ben converted to select dropdown for example, for US states
-            $('.pl-county').val(adaptedAddress.county);
-
-            $addressContainer.empty();
-        };
-
-        return this;
-    }
-
 
 })(jQuery);
