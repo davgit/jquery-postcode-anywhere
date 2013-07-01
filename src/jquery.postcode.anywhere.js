@@ -1,6 +1,12 @@
+// TODO: Check for 'service down' errors and if any are found, set a specific error message taken from the html
+// TODO: Ensure that the lookup button is enabled when the postcode is pasted in
+// TODO: Ensure that the selected country is in the list of supported countries (do this also on first load should in case the page loads with a country already selected)
+// TODO: Remove invalid country error when the country value changes
+
 (function($){
 
     var $errorMessage = $('.pl-error-message');
+    var $errorMessageText = $errorMessage.find('.pl-error-message-text');
     var $postcodeButton = $('.pl-find-postcode-button');
     var $addressContainer = $('.pl-address-container');
     var $init = $('.pl-init');
@@ -13,15 +19,15 @@
         uk:{
             key: $init.data('plUkApiKey'),
             url: {
-                byPostcode  : 'http://services.postcodeanywhere.co.uk/PostcodeAnywhere/Interactive/FindByPostcode/v1.00/json3.ws?callback=?',
-                byId        : 'http://services.postcodeanywhere.co.uk/PostcodeAnywhere/Interactive/RetrieveById/v1.30/json3.ws?callback=?'
+                byPostcode  : '//services.postcodeanywhere.co.uk/PostcodeAnywhere/Interactive/FindByPostcode/v1.00/json3.ws?callback=?',
+                byId        : '//services.postcodeanywhere.co.uk/PostcodeAnywhere/Interactive/RetrieveById/v1.30/json3.ws?callback=?'
             }
         },
         int:{
             key: $init.data('plIntApiKey'),
             url:{
-                byPostcode : 'http://services.postcodeanywhere.co.uk/PostcodeAnywhereInternational/Interactive/RetrieveByPostalCode/v2.20/json3.ws?callback=?',
-                byStreet   : 'http://services.postcodeanywhere.co.uk/PostcodeAnywhereInternational/Interactive/ListBuildings/v1.20/json3.ws?callback=?'
+                byPostcode : '//services.postcodeanywhere.co.uk/PostcodeAnywhereInternational/Interactive/RetrieveByPostalCode/v2.20/json3.ws?callback=?',
+                byStreet   : '//services.postcodeanywhere.co.uk/PostcodeAnywhereInternational/Interactive/ListBuildings/v1.20/json3.ws?callback=?'
             }
         }
     }
@@ -39,7 +45,7 @@
 
     var error =
     {
-        invalidCountry: $init.data('plErrorInvalidCountry'),
+        countryRequired: $init.data('plErrorCountryRequired'),
         noAddressesFound: $init.data('plErrorNoAddressesFound')
     };
 
@@ -69,7 +75,7 @@
 
         if(!countryCode.length)
         {
-            showErrorMessageOf(error.invalidCountry);
+            showErrorMessageOf(error.countryRequired);
         }
         else
         {
@@ -110,7 +116,14 @@
 
     function showErrorMessageOf(message)
     {
-        $errorMessage.html(message);
+        if($errorMessageText.length)
+        {
+            $errorMessageText.html(message);
+        }
+        else
+        {
+            $errorMessage.html(message);
+        }
 
         show($errorMessage);
     }
@@ -592,9 +605,12 @@
             field.$street2.val(adaptedAddress.street2);
             field.$street3.val(adaptedAddress.street3);
             field.$city.val(adaptedAddress.city);
-            field.$county.val(adaptedAddress.county);
             field.$countryCode.val(adaptedAddress.countryCode);
             field.$postCode.val(adaptedAddress.postcode);
+
+            // Don't use a cached version of the county field, should in case it has
+            // ben converted to select dropdown for example, for US states
+            $('.pl-county').val(adaptedAddress.county);
 
             $addressContainer.empty();
         };

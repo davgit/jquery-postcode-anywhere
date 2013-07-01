@@ -49,11 +49,12 @@
 
         <form action=""
               class="pl-init"
-              data-pl-username=""
-              data-pl-int-api-key=""
-              data-pl-uk-api-key=""
-              data-pl-error-invalid-country="Please select a valid country"
+              data-pl-username="DESIG11192"
+              data-pl-int-api-key="GP11-WB99-NB36-WR89"
+              data-pl-uk-api-key="BJ75-NR51-XT96-ZP26"
+              data-pl-error-country-required="Please select a valid country"
               data-pl-error-no-addresses-found="No addresses were found for this postcode"
+              data-pl-error-service-unavailale="The service is currently unavailable. Please try again later"
               data-pl-address-box-size="5">
 
             <div class="row">
@@ -70,7 +71,9 @@
                 <label for="postcode">Postcode</label>
                 <input type="text" id="postcode" class="pl-postcode" placeholder="CA 94043" value="WR2 6NJ"/>
                 <button class="pl-find-postcode-button">Find Postcode</button>
-                <span class="pl-error-message"></span>
+                <div class="pl-error-message">
+                    <span class="pl-error-message-text"></span>
+                </div>
             </div>
 
             <div class="row pl-address-container"></div>
@@ -103,6 +106,6 @@
         </form>
 
         <script src="//ajax.googleapis.com/ajax/libs/jquery/2.0.2/jquery.min.js"></script>
-        <script src="/dist/jquery.postcode.anywhere.min.js"></script>
+        <script src="/src/jquery.postcode.anywhere.js"></script>
     </body>
 </html>
