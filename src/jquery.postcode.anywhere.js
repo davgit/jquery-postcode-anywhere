@@ -13,6 +13,7 @@
     var addressBoxSize = $init.data('plAddressBoxSize');
     var selectedAddressAtLevel = {};
     var supportedCountries;
+    var serviceErrorCodes = [-1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16];
 
     var api =
     {
@@ -48,7 +49,8 @@
     var error =
     {
         countryRequired: $init.data('plErrorCountryRequired'),
-        noAddressesFound: $init.data('plErrorNoAddressesFound')
+        noAddressesFound: $init.data('plErrorNoAddressesFound'),
+        serviceUnavailable: $init.data('plErrorServiceUnavailable')
     };
 
     /////////////////////////////////////////////////////////////////
@@ -57,9 +59,13 @@
 
     getSupportedCountries().then(function(result)
     {
-        if(result.status !== 'error')
+        if(result.status.type !== 'error')
         {
-            supportedCountries = adaptCountries(result.addressCollection.Items);
+            supportedCountries = adaptCountries(result.collection.Items);
+        }
+        else
+        {
+            showErrorMessageOf(result.status.description);
         }
 
         setInterval(enableLookupButtonDependingOnPostcode, 100);
@@ -136,13 +142,35 @@
             }
             else
             {
-                var addressCollectionViewAdapter = addressCollectionViewAdapterFor(countryCode, result.addressCollection.currentLevel);
-                var adaptedAddressCollection     = addressCollectionViewAdapter.adapt(result.addressCollection);
-                var addressCollectionViewHandler = addressCollectionViewHandlerFor(countryCode, result.addressCollection.currentLevel);
+                var addressCollectionViewAdapter = addressCollectionViewAdapterFor(countryCode, result.collection.currentLevel);
+                var adaptedAddressCollection     = addressCollectionViewAdapter.adapt(result.collection);
+                var addressCollectionViewHandler = addressCollectionViewHandlerFor(countryCode, result.collection.currentLevel);
 
                 addressCollectionViewHandler.handle(adaptedAddressCollection);
             }
         });
+    }
+    
+    function arrayOf(items)
+    {
+        this.contains = function(item)
+        {
+            var result = false;
+
+            $.each(items, function(index, eachItem)
+            {
+                if(eachItem == item)
+                {
+                    result = true;
+
+                    return false;
+                }
+            });
+
+            return result;
+        };
+
+        return this;
     }
 
     function enableLookupButtonDependingOnPostcode()
@@ -302,14 +330,25 @@
                     type: '',
                     message: ''
                 },
-                addressCollection: {}
+                collection: {}
             };
             // Test for an error
             if (data.Items.length == 1 && typeof(data.Items[0].Error) != "undefined")
             {
                 apiResult.status.type = 'error';
+                apiResult.status.code = data.Items[0].Error;
                 apiResult.status.message = data.Items[0].Description;
-                apiResult.status.description = data.Items[0].Cause;
+                apiResult.status.nativeDescription = data.Items[0].Cause;
+
+                if(arrayOf(serviceErrorCodes).contains(apiResult.status.code))
+                {
+                    apiResult.status.description = error.serviceUnavailable;
+                }
+                else
+                {
+                    apiResult.status.description = apiResult.status.nativeDescription;
+                }
+
             }
             else
             {
@@ -322,7 +361,7 @@
                 }
                 else {
                     apiResult.status.type = 'success';
-                    apiResult.addressCollection = data;
+                    apiResult.collection = data;
                 }
             }
 
@@ -420,9 +459,9 @@
 
                     callApiWith(api.uk.url.byPostcode, {Key:api.uk.key, Postcode:postcode, UserName:api.username}).then(function(apiResult)
                     {
-                        apiResult.addressCollection.countryCode = 'GB';
-                        apiResult.addressCollection.currentLevel = 'first';
-                        apiResult.addressCollection.nextLevel = 'final';
+                        apiResult.collection.countryCode = 'GB';
+                        apiResult.collection.currentLevel = 'first';
+                        apiResult.collection.nextLevel = 'final';
 
                         result.resolve(apiResult);
                     });
@@ -469,9 +508,9 @@
 
                     callApiWith(api.uk.url.byId, {Key:api.uk.key, Id:id, PreferredLanguage:'', UserName:api.username}).then(function(apiResult)
                     {
-                        apiResult.addressCollection.countryCode = 'GB';
-                        apiResult.addressCollection.currentLevel = 'final';
-                        apiResult.addressCollection.nextLevel = 'none';
+                        apiResult.collection.countryCode = 'GB';
+                        apiResult.collection.currentLevel = 'final';
+                        apiResult.collection.nextLevel = 'none';
 
                         result.resolve(apiResult);
                     });
@@ -520,9 +559,9 @@
 
                     callApiWith(api.int.url.byPostcode, {Key:api.int.key, Country:countryCode, PostalCode:postalCode, Building:-1}).then(function(apiResult)
                     {
-                        apiResult.addressCollection.countryCode = countryCode;
-                        apiResult.addressCollection.currentLevel = 'first';
-                        apiResult.addressCollection.nextLevel = 'second';
+                        apiResult.collection.countryCode = countryCode;
+                        apiResult.collection.currentLevel = 'first';
+                        apiResult.collection.nextLevel = 'second';
 
                         result.resolve(apiResult);
                     });
@@ -579,9 +618,9 @@
 
                     callApiWith(api.int.url.byStreet, {Key:api.int.key, StreetId:streetId}).then(function(apiResult)
                     {
-                        apiResult.addressCollection.countryCode = countryCode;
-                        apiResult.addressCollection.currentLevel = 'second';
-                        apiResult.addressCollection.nextLevel = 'final';
+                        apiResult.collection.countryCode = countryCode;
+                        apiResult.collection.currentLevel = 'second';
+                        apiResult.collection.nextLevel = 'final';
 
                         result.resolve(apiResult);
                     });
@@ -653,7 +692,7 @@
                                 type: 'success',
                                 message: ''
                             },
-                            addressCollection: {
+                            collection: {
                                 countryCode : countryCode,
                                 currentLevel : 'final',
                                 nextLevel : 'none',
