@@ -1,7 +1,7 @@
-// TODO: Check for 'service down' errors and if any are found, set a specific error message taken from the html
-// TODO: Ensure that the lookup button is enabled when the postcode is pasted in
-// TODO: Ensure that the selected country is in the list of supported countries (do this also on first load should in case the page loads with a country already selected)
-// TODO: Remove invalid country error when the country value changes
+// DONE: Check for 'service down' errors and if any are found, set a specific error message taken from the html
+// DONE: Ensure that the lookup button is enabled when the postcode is pasted in
+// DONE: Ensure that the selected country is in the list of supported countries (do this also on first load should in case the page loads with a country already selected)
+// DONE: Remove invalid country error when the country value changes
 
 (function($){
 
@@ -30,21 +30,23 @@
             url:{
                 byPostcode    : '//services.postcodeanywhere.co.uk/PostcodeAnywhereInternational/Interactive/RetrieveByPostalCode/v2.20/json3.ws?callback=?',
                 byStreet      : '//services.postcodeanywhere.co.uk/PostcodeAnywhereInternational/Interactive/ListBuildings/v1.20/json3.ws?callback=?',
-                listCountries : '//services.postcodeanywhere.co.uk/PostcodeAnywhereInternational/Interactive/ListCountries/v2.00/json3.ws?callback=?'
+                listCountries : '//services.postcodeanywhere.co.uk/Extras/Lists/CountryData/v2.00/json3.ws?callback=?'
             }
         }
     }
 
-    var field =
+    var fieldClasses =
     {
-        $postCode    : $('.pl-postcode'),
-        $countryCode : $('.pl-country-code'),
-        $street1     : $('.pl-street1'),
-        $street2     : $('.pl-street2'),
-        $street3     : $('.pl-street3'),
-        $city        : $('.pl-city'),
-        $county      : $('.pl-county')
+        postcode    : 'pl-postcode',
+        countryCode : 'pl-country-code',
+        street1     : 'pl-street1',
+        street2     : 'pl-street2',
+        street3     : 'pl-street3',
+        city        : 'pl-city',
+        county      : 'pl-county'
     };
+
+    var field = {};
 
     var error =
     {
@@ -55,7 +57,30 @@
 
     /////////////////////////////////////////////////////////////////
 
+    setFieldClasses();
+
     setDefaultState();
+
+    setupCountryChangeWatcher();
+
+    $.fn.postcodeAnywhere = function(settings)
+    {
+        setDefaultState();
+
+        if(settings.fieldSelectors !== undefined)
+        {
+            for(selectorKey in settings.fieldSelectors)
+            {
+                $(settings.fieldSelectors[selectorKey]).addClass(fieldClasses[selectorKey]);
+
+                field['$' + selectorKey] = $('.' + fieldClasses[selectorKey]);
+            }
+
+            setupCountryChangeWatcher();
+        }
+
+        return this;
+    };
 
     getSupportedCountries().then(function(result)
     {
@@ -71,34 +96,12 @@
         setInterval(enableLookupButtonDependingOnPostcode, 100);
     });
 
-    field.$countryCode.on('change', function()
-    {
-        var countryCode = field.$countryCode.val();
-
-        if(countryCode.length)
-        {
-            if(supportedCountries[countryCode] === undefined)
-            {
-                hide($postcodeButton)
-            }
-            else
-            {
-                show($postcodeButton)
-
-                if(currentErrorMessageIs(error.countryRequired))
-                {
-                    hideErrorMessage();
-                }
-            }
-        }
-    });
-
     $postcodeButton.on('click', function(event)
     {
         event.preventDefault();
 
         var countryCode = field.$countryCode.val();
-        var postcode = field.$postCode.val();
+        var postcode = field.$postcode.val();
         var level = 'first';
 
         if(!countryCode.length)
@@ -129,6 +132,39 @@
             populateViewWithAddressIn(countryCode, addressId, level);
         }
     });
+
+    function setupCountryChangeWatcher()
+    {
+        field.$countryCode.on('change', function()
+        {
+            var countryCode = field.$countryCode.val();
+
+            if(countryCode.length)
+            {
+                if(supportedCountries[countryCode] === undefined)
+                {
+                    hide($postcodeButton)
+                }
+                else
+                {
+                    show($postcodeButton)
+
+                    if(currentErrorMessageIs(error.countryRequired))
+                    {
+                        hideErrorMessage();
+                    }
+                }
+            }
+        });
+    }
+
+    function setFieldClasses()
+    {
+        for(classKey in fieldClasses)
+        {
+            field['$' + classKey] = $('.' + fieldClasses[classKey]);
+        }
+    }
 
     function populateViewWithAddressIn(countryCode, postcode, level)
     {
@@ -175,7 +211,7 @@
 
     function enableLookupButtonDependingOnPostcode()
     {
-        if(field.$postCode.val())
+        if(field.$postcode.val())
         {
             enable($postcodeButton);
         }
@@ -210,7 +246,7 @@
 
         hide($errorMessage);
 
-        if(field.$postCode.val() == '')
+        if(field.$postcode.val() == '')
         {
             disable($postcodeButton)
         }
@@ -309,10 +345,13 @@
         {
             var country = this;
 
-            result[country.Iso2] =
+            if(country.Postcodes)
             {
-                iso3: country.Iso3,
-                name: country.Name
+                result[country.Iso2] =
+                {
+                    iso3: country.Iso3,
+                    name: country.Name
+                }
             }
         });
 
@@ -433,7 +472,7 @@
             field.$street3.val(adaptedAddress.street3);
             field.$city.val(adaptedAddress.city);
             field.$countryCode.val(adaptedAddress.countryCode);
-            field.$postCode.val(adaptedAddress.postcode);
+            field.$postcode.val(adaptedAddress.postcode);
 
             // Don't use a cached version of the county field, should in case it has
             // ben converted to select dropdown for example, for US states
