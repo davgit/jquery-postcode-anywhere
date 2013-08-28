@@ -1,8 +1,3 @@
-// DONE: Check for 'service down' errors and if any are found, set a specific error message taken from the html
-// DONE: Ensure that the lookup button is enabled when the postcode is pasted in
-// DONE: Ensure that the selected country is in the list of supported countries (do this also on first load should in case the page loads with a country already selected)
-// DONE: Remove invalid country error when the country value changes
-
 (function($){
 
     var $errorMessage = $('.pl-error-message');
@@ -409,6 +404,23 @@
 
         return result.promise();
     }
+    
+    function getIntFirstLevelAddressViewHandler()
+    {
+        this.handle = function(adaptedAddressCollection)
+        {
+            if(adaptedAddressCollection.Items.length > 1)
+            {
+                getFirstLevelAddressViewHandler().handle(adaptedAddressCollection);
+            }
+            else
+            {
+                getFinalLevelAddressViewHandler().handle(adaptedAddressCollection);
+            }
+        }
+
+        return this;
+    }
 
     function getFirstLevelAddressViewHandler()
     {
@@ -615,36 +627,54 @@
             {
                 this.adapt = function(addressCollection)
                 {
-                    var adaptedItems = [];
-                    var result =
-                    {
-                        firstOptionLabel: 'Select your street',
-                        countryCode: addressCollection.countryCode,
-                        currentLevel: addressCollection.currentLevel,
-                        nextLevel: addressCollection.nextLevel
-                    }
 
-                    $.each(addressCollection.Items, function(index, item)
+                    if(addressCollection.Items.length === 1 && addressCollection.Items[0].Description.length ===0)
                     {
-                        var adaptedItem =
+                        var item = addressCollection.Items[0];
+
+                        addressCollection.street1 = item.street;
+                        addressCollection.street2 = '';
+                        addressCollection.street3 = '';
+                        addressCollection.city = item.City;
+                        addressCollection.county = item.State.length ? item.State : item.District;
+                        addressCollection.postcode = item.PostalCode;
+                        addressCollection.countryName = item.Country;
+
+                        return addressCollection;
+                    }
+                    else
+                    {
+                        var adaptedItems = [];
+                        var result =
                         {
-                            id: item.StreetId,
-                            label: item.Description,
-                            stringified: JSON.stringify(item)
+                            firstOptionLabel: 'Select your street',
+                            countryCode: addressCollection.countryCode,
+                            currentLevel: addressCollection.currentLevel,
+                            nextLevel: addressCollection.nextLevel
                         }
 
-                        adaptedItems.push(adaptedItem);
-                    });
+                        $.each(addressCollection.Items, function(index, item)
+                        {
+                            var adaptedItem =
+                            {
+                                id: item.StreetId,
+                                label: item.Description,
+                                stringified: JSON.stringify(item)
+                            }
 
-                    result.Items = adaptedItems;
+                            adaptedItems.push(adaptedItem);
+                        });
 
-                    return result;
+                        result.Items = adaptedItems;
+
+                        return result;
+                    }
                 }
 
                 return this;
             },
 
-            addressViewHandler: getFirstLevelAddressViewHandler
+            addressViewHandler: getIntFirstLevelAddressViewHandler
         },
 
         second:

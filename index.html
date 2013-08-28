@@ -59,18 +59,19 @@
 
             <div class="row">
                 <label for="country">Country</label>
-                <select name="country" id="country" >   <!-- class="pl-country-code" -->
+                <select name="country" id="country" class="pl-country-code">   <!-- class="pl-country-code" -->
                     <option value=""></option>
                     <option value="AS">American Samoa</option>
                     <option value="DE">Germany</option>
                     <option value="GB">United Kingdom</option>
                     <option value="US">United States</option>
+                    <option value="CN">China</option>
                 </select>
             </div>
 
             <div class="row">
                 <label for="postcode">Postcode</label>
-                <input type="text" id="postcode" placeholder="WR2 6NJ" value=""/>   <!-- class="pl-postcode" -->
+                <input type="text" id="postcode" placeholder="WR2 6NJ" value="" class="pl-postcode"/>   <!-- class="pl-postcode" -->
                 <button class="pl-find-postcode-button">Find Postcode</button>
                 <div class="pl-error-message">
                     <span class="pl-error-message-text"></span>
@@ -81,33 +82,34 @@
 
             <div class="row">
                 <label for="street1">Address line 1</label>
-                <input type="text" id="street1" />  <!-- class="pl-street1" -->
+                <input type="text" id="street1" class="pl-street1"/>  <!-- class="pl-street1" -->
             </div>
 
 
             <div class="row">
                 <label for="street2">Address line 2</label>
-                <input type="text" id="street2" />  <!-- class="pl-street2" -->
+                <input type="text" id="street2" class="pl-street2" />  <!-- class="pl-street2" -->
             </div>
 
             <div class="row">
                 <label for="street3">Address line 3</label>
-                <input type="text" id="street3" /> <!-- class="pl-street3" -->
+                <input type="text" id="street3" class="pl-street3" /> <!-- class="pl-street3" -->
             </div>
 
             <div class="row">
                 <label for="city">Town/City</label>
-                <input type="text" id="city" />  <!-- class="pl-city" -->
+                <input type="text" id="city" class="pl-city" />  <!-- class="pl-city" -->
             </div>
 
             <div class="row">
                 <label for="county">County/State/Province</label>
-                <input type="text" id="county" /> <!-- class="pl-county" -->
+                <input type="text" id="county" class="pl-county" /> <!-- class="pl-county" -->
             </div>
         </form>
 
         <script src="//ajax.googleapis.com/ajax/libs/jquery/2.0.2/jquery.min.js"></script>
         <script src="/src/jquery.postcode.anywhere.js"></script>
+        <!--
         <script>
             $().postcodeAnywhere({
                 fieldSelectors :{
@@ -121,5 +123,6 @@
                 }
             });
         </script>
+        -->
     </body>
 </html>
