@@ -181,7 +181,7 @@
             }
         });
     }
-    
+
     function arrayOf(items)
     {
         this.contains = function(item)
@@ -234,7 +234,7 @@
 
         hide($errorMessage);
     }
-    
+
     function setDefaultState()
     {
         hide($addressContainer);
@@ -260,7 +260,7 @@
 
         show($errorMessage);
     }
-    
+
     function getSelectedOptionByValueFromSelector($selector, value)
     {
         var $selectedOption;
@@ -304,7 +304,7 @@
     {
         return strategyFor(countryCode)[level]['addressFinder'](countryCode);
     }
-    
+
     function addressCollectionViewAdapterFor(countryCode, level)
     {
         return strategyFor(countryCode)[level]['addressCollectionViewAdapter']();
@@ -422,6 +422,23 @@
         return this;
     }
 
+    function getIntFirstLevelAddressViewHandler()
+    {
+        this.handle = function(adaptedAddressCollection)
+        {
+            if(adaptedAddressCollection.Items.length > 1)
+            {
+                getFirstLevelAddressViewHandler().handle(adaptedAddressCollection);
+            }
+            else
+            {
+                getFinalLevelAddressViewHandler().handle(adaptedAddressCollection);
+            }
+        }
+
+        return this;
+    }
+
     function getFirstLevelAddressViewHandler()
     {
         this.handle = function(adaptedAddressCollection)
@@ -467,6 +484,8 @@
 
             $select.append($option);
         });
+
+        $addressContainer.children('select').eq(1).remove();
 
         $addressContainer.append($select);
 
