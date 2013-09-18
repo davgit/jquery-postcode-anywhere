@@ -404,7 +404,7 @@
 
         return result.promise();
     }
-    
+
     function getIntFirstLevelAddressViewHandler()
     {
         this.handle = function(adaptedAddressCollection)
@@ -488,6 +488,8 @@
         $addressContainer.children('select').eq(1).remove();
 
         $addressContainer.append($select);
+
+        $select.val(''); // Select the first entry by default
 
         show($addressContainer);
     }
