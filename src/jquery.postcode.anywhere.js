@@ -82,6 +82,11 @@
         if(result.status.type !== 'error')
         {
             supportedCountries = adaptCountries(result.collection.Items);
+
+            if(countryHasBeenSelected() && selectedCountryIsNotSupported())
+            {
+                hide($postcodeButton);
+            }
         }
         else
         {
@@ -151,6 +156,30 @@
                 }
             }
         });
+    }
+
+    function countryHasBeenSelected()
+    {
+        var countryCode = field.$countryCode.val();
+
+        if(countryCode.length)
+        {
+            return true;
+        }
+
+        return false;
+    }
+
+    function selectedCountryIsNotSupported()
+    {
+        var countryCode = field.$countryCode.val();
+
+        if(supportedCountries[countryCode] === undefined)
+        {
+            return true;
+        }
+
+        return false;
     }
 
     function setFieldClasses()
