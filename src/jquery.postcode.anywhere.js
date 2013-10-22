@@ -1,7 +1,6 @@
 (function($){
 
     var defaultOptions = {
-        initContainer           : '.pl-init',
         errorMessageContainer   : '.pl-error-message',
         errorMessageText        : '.pl-error-message-text',
         findPostcodeButton      : '.pl-find-postcode-button',
