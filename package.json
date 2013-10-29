@@ -1,7 +1,7 @@
 {
   "name": "jquery-postcode-anywhere",
   "title": "jQuery PostcodeAnywhere",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "Postcode lookup functionality implemented with jQuery using the PostcodeAnywhere API (WIP)",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"

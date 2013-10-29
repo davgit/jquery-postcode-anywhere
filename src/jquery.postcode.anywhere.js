@@ -16,34 +16,39 @@
             county          : 'pl-county',
             addressSelector : 'pl-address-chooser'
         }
+
+        // TODO: Add defaults for pl-init related settings
     };
 
     var PostcodeAnywhere = function(target, userOptions)
     {
-        var options = $.extend({}, defaultOptions, userOptions);
-
+        var self = this;
         var $init = $(target);
-        var $errorMessage = $(options.errorMessageContainer);
-        var $errorMessageText = $errorMessage.find(options.errorMessageText);
-        var $postcodeButton = $(options.findPostcodeButton);
-        var $addressContainer = $(options.addressResultsContainer);
-        var addressBoxSize = $init.data('plAddressBoxSize');
+
+        this.options = $.extend({}, defaultOptions, userOptions, $init.data());
+
+
+        var $errorMessage = $(self.options.errorMessageContainer);
+        var $errorMessageText = $errorMessage.find(self.options.errorMessageText);
+        var $postcodeButton = $(self.options.findPostcodeButton);
+        var $addressContainer = $(self.options.addressResultsContainer);
+        var addressBoxSize = self.options.plAddressBoxSize;
         var selectedAddressAtLevel = {};
         var supportedCountries;
         var serviceErrorCodes = [-1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16];
 
         var api =
         {
-            username: $init.data('plUsername'),
+            username: self.options.plUsername,
             uk:{
-                key: $init.data('plUkApiKey'),
+                key: self.options.plUkApiKey,
                 url: {
                     byPostcode  : '//services.postcodeanywhere.co.uk/PostcodeAnywhere/Interactive/FindByPostcode/v1.00/json3.ws?callback=?',
                     byId        : '//services.postcodeanywhere.co.uk/PostcodeAnywhere/Interactive/RetrieveById/v1.30/json3.ws?callback=?'
                 }
             },
             int:{
-                key: $init.data('plIntApiKey'),
+                key: self.options.plIntApiKey,
                 url:{
                     byPostcode    : '//services.postcodeanywhere.co.uk/PostcodeAnywhereInternational/Interactive/RetrieveByPostalCode/v2.20/json3.ws?callback=?',
                     byStreet      : '//services.postcodeanywhere.co.uk/PostcodeAnywhereInternational/Interactive/ListBuildings/v1.20/json3.ws?callback=?',
@@ -56,9 +61,9 @@
 
         var error =
         {
-            countryRequired: $init.data('plErrorCountryRequired'),
-            noAddressesFound: $init.data('plErrorNoAddressesFound'),
-            serviceUnavailable: $init.data('plErrorServiceUnavailable')
+            countryRequired: self.options.plErrorCountryRequired,
+            noAddressesFound: self.options.plErrorNoAddressesFound,
+            serviceUnavailable: self.options.plErrorServiceUnavailable
         };
 
         /////////////////////////////////////////////////////////////////
@@ -77,9 +82,9 @@
             {
                 for(var selectorKey in settings.fieldSelectors)
                 {
-                    $(settings.fieldSelectors[selectorKey]).addClass(options.fieldClasses[selectorKey]);
+                    $(settings.fieldSelectors[selectorKey]).addClass(self.options.fieldClasses[selectorKey]);
 
-                    field['$' + selectorKey] = $('.' + options.fieldClasses[selectorKey]);
+                    field['$' + selectorKey] = $('.' + self.options.fieldClasses[selectorKey]);
                 }
 
                 setupCountryChangeWatcher();
@@ -125,7 +130,7 @@
             }
         });
 
-        $addressContainer.on('change', '.' + options.fieldClasses.addressSelector , function(event)
+        $addressContainer.on('change', '.' + self.options.fieldClasses.addressSelector , function(event)
         {
             event.preventDefault();
 
@@ -195,9 +200,9 @@
 
         function setFieldClasses()
         {
-            for(var classKey in options.fieldClasses)
+            for(var classKey in self.options.fieldClasses)
             {
-                field['$' + classKey] = $('.' + options.fieldClasses[classKey]);
+                field['$' + classKey] = $('.' + self.options.fieldClasses[classKey]);
             }
         }
 
@@ -501,7 +506,7 @@
             }
 
             $select
-                .addClass(options.fieldClasses.addressSelector)
+                .addClass(self.options.fieldClasses.addressSelector)
                 .addClass(adaptedAddressCollection.currentLevel)
                 .attr('name', 'address-chooser')
                 .data('country-code', adaptedAddressCollection.countryCode)
@@ -549,7 +554,7 @@
 
                 // Don't use a cached version of the county field, should in case it has
                 // ben converted to select dropdown for example, for US states
-                $('.' + options.fieldClasses.county).val(adaptedAddress.county);
+                $('.' + self.options.fieldClasses.county).val(adaptedAddress.county);
 
                 $addressContainer.empty();
             };
@@ -897,3 +902,11 @@
     }
 
 })(jQuery);
+
+if(window.jQuery)
+{
+    window.jQuery(function()
+    {
+        window.jQuery('.pl-init').postcodeAnywhere();
+    });
+}
